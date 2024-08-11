@@ -11,7 +11,7 @@ if [ "$1" == "--clean" ];then
     echo "目录已删除"
     exit 0;
 fi
-exit 0;
+
 
 # 删除已经存在的workspace目录
 if [ -d "$LIVE_BOOT" ]; then
@@ -21,6 +21,7 @@ if [ -d "$LIVE_BOOT" ]; then
 fi
 mkdir -p "$LIVE_BOOT"
 
+# 下载debian base
 sudo debootstrap \
     --arch=amd64 \
     --variant=minbase \
@@ -30,6 +31,7 @@ sudo debootstrap \
 
 echo "cutefish-live" | sudo tee "${DEBIAN_CHROOT}/etc/hostname"
 
+# 安装基础软件
 sudo chroot "${DEBIAN_CHROOT}" << EOF
 apt-get update && \
 apt-get install -y --no-install-recommends \
@@ -46,20 +48,25 @@ apt-get install -y --no-install-recommends \
     nano
 EOF
 
+# 设置密码
 sudo chroot "${DEBIAN_CHROOT}" passwd root
 
+# 创建构建iso所需目录
 mkdir -p "${LIVE_BOOT}"/{staging/{EFI/BOOT,boot/grub/x86_64-efi,isolinux,live},tmp}
 
+# 打包rootfs
 sudo mksquashfs \
     "${DEBIAN_CHROOT}" \
     "${LIVE_BOOT}/staging/live/filesystem.squashfs" \
     -e boot
 
+# 拷贝内核等相关文件
 cp "${DEBIAN_CHROOT}/boot"/vmlinuz-* \
     "${LIVE_BOOT}/staging/live/vmlinuz" && \
 cp "${DEBIAN_CHROOT}/boot"/initrd.img-* \
     "${LIVE_BOOT}/staging/live/initrd"
 
+# 创建grub相关配置文件
 cat <<'EOF' > "${LIVE_BOOT}/staging/isolinux/isolinux.cfg"
 UI vesamenu.c32
 
@@ -162,6 +169,7 @@ grub-mkstandalone -O x86_64-efi \
         ::/EFI/BOOT/
 )
 
+# 创建iso文件
 xorriso \
     -as mkisofs \
     -iso-level 3 \
