@@ -2,7 +2,8 @@
 
 PWD=`pwd`
 
-LIVE_BOOT=${PWD}/LIVE_BOOT
+#LIVE_BOOT=${PWD}/LIVE_BOOT
+LIVE_BOOT=/mnt/disk1/LIVE_BOOT
 DEBIAN_CHROOT=${LIVE_BOOT}/chroot
 
 if [ "$1" == "--clean" ];then
@@ -11,7 +12,6 @@ if [ "$1" == "--clean" ];then
     echo "目录已删除"
     exit 0;
 fi
-
 
 # 删除已经存在的workspace目录
 if [ -d "$LIVE_BOOT" ]; then
@@ -50,6 +50,32 @@ EOF
 
 # 设置密码
 sudo chroot "${DEBIAN_CHROOT}" passwd root
+
+# 安装cutefish
+mkdir ${DEBIAN_CHROOT}/package
+cp ./package/cutefish/*.deb ${DEBIAN_CHROOT}/package/
+sudo chroot "${DEBIAN_CHROOT}" << EOF
+    cd /package
+    dpkg -i *.deb
+    rm -f /var/cache/apt/archives/*
+    apt --fix-broken -d install -y
+    cd /var/cache/apt/archives/
+    dpkg -i --force-overwrite *.deb
+    apt --fix-broken install -y
+    cd /package
+    dpkg -i --force-overwrite *.deb
+    apt remove kdeconnect -y
+    apt remove zutty -y 
+    apt remove plasma-discover -y
+    apt remove systemsettings -y
+    apt remove plasma-systemmonitor -y
+    apt remove partitionmanager -y
+    apt remove kwalletmanager -y
+    apt remove plasma-workspace -y
+    rm -f /var/cache/apt/archives/*
+EOF
+rm -rf ${DEBIAN_CHROOT}/package
+
 
 # 创建构建iso所需目录
 mkdir -p "${LIVE_BOOT}"/{staging/{EFI/BOOT,boot/grub/x86_64-efi,isolinux,live},tmp}
