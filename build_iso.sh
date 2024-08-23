@@ -42,18 +42,21 @@ EOF
 
 sudo chroot "${DEBIAN_CHROOT}" << EOF
 apt-get install -y --no-install-recommends \
-    iwd \
-    curl openssh-client \
-    openbox xserver-xorg-core xserver-xorg xinit xterm \
-    nano
+    xserver-xorg-core xserver-xorg xinit xterm 
 EOF
 
-# 设置密码
-sudo chroot "${DEBIAN_CHROOT}" passwd root
+# 创建用户设置密码
+sudo chroot "${DEBIAN_CHROOT}" << EOF
+    useradd cutefish-live
+    echo cutefish-live:cutefish | chpasswd &> /dev/null
+    usermod -aG sudo cutefish-live
+EOF
 
-# 安装cutefish
+# 安装cutefish安装器
 mkdir ${DEBIAN_CHROOT}/package
 cp ./package/cutefish/*.deb ${DEBIAN_CHROOT}/package/
+
+# 安装所有cutefish软件
 sudo chroot "${DEBIAN_CHROOT}" << EOF
     cd /package
     dpkg -i *.deb
