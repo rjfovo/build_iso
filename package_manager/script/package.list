@@ -1,0 +1,6 @@
+util-macros xorg    https://www.x.org/pub/individual/util/util-macros-1.20.0.tar.xz
+xorgproto   xorg    https://xorg.freedesktop.org/archive/individual/proto/xorgproto-2023.2.tar.xz
+libXau      xorg    https://www.x.org/pub/individual/lib/libXau-1.0.11.tar.xz
+libXdmcp    xorg    https://www.x.org/pub/individual/lib/libXdmcp-1.1.4.tar.xz
+xcb-proto   xorg    https://xorg.freedesktop.org/archive/individual/proto/xcb-proto-1.16.0.tar.xz
+libxcb      xorg    https://xorg.freedesktop.org/archive/individual/lib/libxcb-1.16.tar.xz
